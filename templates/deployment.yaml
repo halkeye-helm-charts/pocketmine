@@ -20,6 +20,27 @@ spec:
         app.kubernetes.io/name: {{ include "pocketmine.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
+{{- if .Values.persistence.enabled }}
+      initContainers:
+        - name: grab-pocketmine
+          image: "busybox:1.30.0"
+          imagePullPolicy: "Always"
+          securityContext:
+            runAsUser: 0
+          command: ["sh", "-c", "test -f /data/pocketmine.yml || wget -O /data/pocketmine.yml https://raw.githubusercontent.com/crscheid/pocketmine-mp/master/pocketmine.yml"]
+          volumeMounts:
+          - name: data
+            mountPath: /data
+        - name: grab-server-properties
+          image: "busybox:1.30.0"
+          imagePullPolicy: "Always"
+          securityContext:
+            runAsUser: 0
+          command: ["sh", "-c", "test -f /data/server.properties || wget -O server.properties https://raw.githubusercontent.com/crscheid/pocketmine-mp/master/server.properties"]
+          volumeMounts:
+          - name: data
+            mountPath: /data
+{{- end }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
