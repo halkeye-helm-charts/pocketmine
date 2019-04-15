@@ -43,7 +43,7 @@ spec:
       - name: data
       {{- if .Values.persistence.enabled }}
         persistentVolumeClaim:
-          claimName: {{ template "pocketmp.fullname" . }}
+          claimName: {{ template "pocketmine.fullname" . }}
       {{- else }}
         emptyDir: {}
       {{- end }}
