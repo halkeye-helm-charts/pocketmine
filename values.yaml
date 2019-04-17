@@ -6,9 +6,9 @@
 replicaCount: 1
 
 image:
-  repository: cscheide/pocketmine-mp
-  tag: 3.6.1
-  pullPolicy: IfNotPresent
+  repository: circleeh/pocketmine
+  tag: latest
+  pullPolicy: Always
 
 nameOverride: ""
 fullnameOverride: ""
@@ -34,6 +34,9 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+plugins:
+  - https://poggit.pmmp.io/r/17958/XBL_PlayerList.phar
 
 persistence:
   enabled: false

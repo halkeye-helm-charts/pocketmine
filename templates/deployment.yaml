@@ -20,31 +20,25 @@ spec:
         app.kubernetes.io/name: {{ include "pocketmine.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
-{{- if .Values.persistence.enabled }}
-      initContainers:
-        - name: grab-pocketmine
-          image: "busybox:1.30.0"
-          imagePullPolicy: "Always"
-          securityContext:
-            runAsUser: 0
-          command: ["sh", "-c", "test -f /data/pocketmine.yml || wget -O /data/pocketmine.yml https://raw.githubusercontent.com/crscheid/pocketmine-mp/master/pocketmine.yml"]
-          volumeMounts:
-          - name: data
-            mountPath: /data
-        - name: grab-server-properties
-          image: "busybox:1.30.0"
-          imagePullPolicy: "Always"
-          securityContext:
-            runAsUser: 0
-          command: ["sh", "-c", "test -f /data/server.properties || wget -O server.properties https://raw.githubusercontent.com/crscheid/pocketmine-mp/master/server.properties"]
-          volumeMounts:
-          - name: data
-            mountPath: /data
-{{- end }}
+      {{- if .Values.dnsConfig }}
+      dnsConfig:
+        {{- toYaml .Values.dnsConfig | nindent 8 }}
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: TZ
+              value: "America/Vancouver"
+            - name: PUID
+              value: "1000"
+            - name: GUID
+              value: "1000"
+{{- if .Values.plugins }}
+            - name: PLUGINS
+              value: {{ join " " .Values.plugins | quote }}
+{{- end }}
           ports:
             - name: server
               containerPort: 19132
@@ -57,7 +51,7 @@ spec:
 #              port: server
           volumeMounts:
           - name: data
-            mountPath: /data
+            mountPath: /config
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:
